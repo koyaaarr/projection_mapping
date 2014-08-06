@@ -5,7 +5,7 @@ using namespace cv;
 
 int main( int argc, char** argv )
 {
-    cv::Mat src;
+    //cv::Mat src;
 
 	cv::VideoCapture cap(0);
     if(!cap.isOpened())
@@ -14,9 +14,17 @@ int main( int argc, char** argv )
 
 	while(1)
 	{
+		Mat src;
 		cap >> src;
 
-		cv::imshow( "window", src );
+		if(!src.empty())
+		{
+			cv::imshow( "window", src );
+		}
+		else
+		{
+			cout << "error" << endl;
+		}
 		if (waitKey(2) > 0) 
 		{
             break;
