@@ -7,8 +7,8 @@ int main( int argc, char** argv )
 {
     cv::Mat src;
 
-	cv::VideoCapture cap(0); // デフォルトカメラをオープン
-    if(!cap.isOpened())  // 成功したかどうかをチェック
+	cv::VideoCapture cap(0);
+    if(!cap.isOpened())
         return -1;
     cv::namedWindow("window",1);
 
@@ -16,7 +16,7 @@ int main( int argc, char** argv )
 	{
 		cap >> src;
 
-		cv::imshow( "window", src );                   // Show our image inside it.
+		cv::imshow( "window", src );
 		if (waitKey(2) > 0) 
 		{
             break;
