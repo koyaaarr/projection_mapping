@@ -7,7 +7,7 @@ int main( int argc, char** argv )
 {
     //cv::Mat src;
 
-	cv::VideoCapture cap(0);
+	cv::VideoCapture cap(1);
     if(!cap.isOpened())
         return -1;
     cv::namedWindow("window",1);
@@ -17,13 +17,13 @@ int main( int argc, char** argv )
 		Mat src;
 		cap >> src;
 
-		if(!src.empty())
+		if(src.empty())
 		{
-			cv::imshow( "window", src );
+			cout << "error" << endl;
 		}
 		else
 		{
-			cout << "error" << endl;
+			cv::imshow( "window", src );
 		}
 		if (waitKey(2) > 0) 
 		{

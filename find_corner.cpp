@@ -5,6 +5,8 @@ STimerList st;
 using namespace std;
 using namespace cv;
 
+#define SRC_IMAGE "C:/Users/koyajima/Pictures/Projection_Mapping/id0102.png"
+
 ///////////////////   fullscreen.cpp   /////////////////////
 
 typedef struct {
@@ -60,10 +62,9 @@ int main(int argc, char *argv[]){
 	}
 	cap.set(CV_CAP_PROP_FRAME_WIDTH, 640);
 	cap.set(CV_CAP_PROP_FRAME_HEIGHT, 480);
-	cv::Mat src;
 	//cv::namedWindow("Capture", CV_WINDOW_AUTOSIZE|CV_WINDOW_FREERATIO);
-	cv::Mat marker = cv::imread("C:/Users/koyajima/Pictures/Projection_Mapping/id0102.png");
-	if(marker.empty())
+	cv::Mat prjcted = cv::imread(SRC_IMAGE);
+	if(prjcted.empty())
 	{
 		cout << "error:image not found" << endl;
 		return -1;
@@ -73,12 +74,11 @@ int main(int argc, char *argv[]){
 	ScreenInfo si;
     getScreenInfo(1, &si);
 	setWindowFullscreen("projection", &si);
-	cv::Mat marker_fit;
-    cv::resize(marker, marker_fit, cv::Size(si.width, si.height),0, 0, cv::INTER_CUBIC);
+    cv::resize(prjcted, prjcted, cv::Size(si.width, si.height),0, 0, cv::INTER_CUBIC);
 
 //       輪郭検出の初期設定
-
-	Mat gray, bin;
+	
+	Mat src, gray, bin;
 	vector< vector<cv::Point> > contours;
 	cv::vector<cv::vector<cv::Point>> squares;
 	cv::vector<cv::vector<cv::Point> > poly;
@@ -86,7 +86,6 @@ int main(int argc, char *argv[]){
 	const int thick=2;
 	std::vector<cv::Vec4i> hierarchy;
 	std::vector<cv::Point> approx;
-	cv::Point2f pt_cs[4];
 
 //        ARtoolkitの初期設定
 
@@ -113,87 +112,7 @@ int main(int argc, char *argv[]){
 	// マーカの一辺のサイズ [mm] （実測値）
 	float w = 59.0f;
 	cv::Point2f corner[4];
-	cv::Point2f outer[4];
 	int radius = 5; // キーポイントの半径
-	cv::Point2f pt_cp[4];
-
-//         ホモグラフィ変換の初期設定
-
-	//P座標設定
-	Point2f ex_pt_pi[4];
-	Point2f ex2_pt_pi[4];
-	Point2f ex3_pt_pi[4];
-	Point2f ex4_pt_pi[4];
-	Point2f pt_pi[4];
-	Point2f pt_po[4];
-	//DVI用
-	pt_pi[0] = cv::Point2f(483.0f,184.0f);
-	pt_pi[1] = cv::Point2f(483.0f,584.0f);
-	pt_pi[2] = cv::Point2f(883.0f,584.0f);
-	pt_pi[3] = cv::Point2f(883.0f,184.0f);
-
-	pt_po[0] = cv::Point2f(1,1);
-	pt_po[1] = cv::Point2f(1,768);
-	pt_po[2] = cv::Point2f(1366,768);
-	pt_po[3] = cv::Point2f(1366,1);
-
-	//HDMI用		
-	//pt_pi[0] = cv::Point2f(327.0f,140.0f);
-	//pt_pi[1] = cv::Point2f(327.0f,340.0f);
-	//pt_pi[2] = cv::Point2f(527.0f,340.0f);
-	//pt_pi[3] = cv::Point2f(527.0f,140.0f);
-
-	//pt_po[0] = cv::Point2f(1,1);
-	//pt_po[1] = cv::Point2f(1,480);
-	//pt_po[2] = cv::Point2f(854,480);
-	//pt_po[3] = cv::Point2f(854,1);
-
-	//I座標設定
-	//内枠
-	const cv::Point2f pt_ii[] = {cv::Point2f(406,206),cv::Point2f(406,306),cv::Point2f(506,306),
-		cv::Point2f(506,206)};
-	//外枠	
-	const cv::Point2f pt_io[] = {cv::Point2f(1,1),cv::Point2f(1,912),cv::Point2f(513,912),
-		cv::Point2f(513,1)};
-	//S座標設定
-	//const cv::Point2f pt_si[] = {cv::Point2f(20,40),cv::Point2f(20,70),cv::Point2f(50,70),
-	//							cv::Point2f(50,40)};
-	//const cv::Point2f pt_so[] = {cv::Point2f(0,0),cv::Point2f(0,100),cv::Point2f(100,100),
-	//							cv::Point2f(100,0)};
-	cv::Point2f pt_si[4];
-	cv::Point2f pt_so[4];
-	//背景に写す用
-	//pt_si[0] = cv::Point2f(327.0f,140.0f);
-	//pt_si[1] = cv::Point2f(327.0f,340.0f);
-	//pt_si[2] = cv::Point2f(527.0f,340.0f);
-	//pt_si[3] = cv::Point2f(527.0f,140.0f);
-
-	//pt_so[0] = cv::Point2f(1,1);
-	//pt_so[1] = cv::Point2f(1,480);
-	//pt_so[2] = cv::Point2f(854,480);
-	//pt_so[3] = cv::Point2f(854,1);
-
-	//A4に写す用
-	pt_si[0] = cv::Point2f(112,72);
-	pt_si[1] = cv::Point2f(112,147);
-	pt_si[2] = cv::Point2f(187,147);
-	pt_si[3] = cv::Point2f(187,72);
-
-	pt_so[0] = cv::Point2f(0,0);
-	pt_so[1] = cv::Point2f(0,210);
-	pt_so[2] = cv::Point2f(297,210);
-	pt_so[3] = cv::Point2f(297,0);
-
-	//IからS
-	const cv::Mat iHsi = cv::getPerspectiveTransform( pt_ii, pt_si);
-
-	int temp=0;
-	int frame=0;
-	Mat sHc, pHc, warp;
-	vector<Point2f> p_corner(4);
-	cv::Mat iHp = cv::Mat(3,3,CV_32F);
-	cv::Mat iHp_origin = cv::Mat(3,3,CV_32F);
-	cv::Mat soHcs, cpHp;
 
 	while(1) {
 		st.laptime(0);
@@ -260,13 +179,14 @@ int main(int argc, char *argv[]){
 			}
 		}
 		///////4点を描く
-		for(int l = 0; l < 4; l++)
-		{
-			cv::circle(src, corner[l], radius,  CV_RGB(0,0,255), 5, 8, 0);
+		if(corner[0].x != 0){
+			for(int l = 0; l < 4; l++)
+			{
+				cv::circle(src, corner[l], radius,  CV_RGB(0,0,255), 5, 8, 0);
+			}
 		}
-
 		/*表示*/
-		cv::imshow("projection", marker_fit);
+		cv::imshow("projection", prjcted);
 		cv::imshow("Capture", src);
 		//cv::imshow("bin", bin);
 
