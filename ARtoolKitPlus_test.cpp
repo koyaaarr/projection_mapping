@@ -9,6 +9,7 @@
 #define FAR_LEN		10000.0
 
 using namespace cv;
+using namespace std;
 
 int main(int argc, char *argv[]){
 	//// OpenCV側
@@ -44,12 +45,26 @@ int main(int argc, char *argv[]){
 	float w = 59.0f;
 
 	int temp=0;
+	int error=0;
 
 	while(1)
 	{
 		Mat frame, img;
 		cap >> frame;
 		frame.copyTo(img);
+
+		// カメラ画像が10回取得できなかったら終わり
+		if(error == 10)
+		{
+			break;
+		}
+
+		if(img.empty())
+		{
+			cout << "empty" << endl;
+			error++;
+			continue;
+		}
 
 		 /////画像中からマーカを検出
 		tracker->calc((unsigned char *)(img.data));
