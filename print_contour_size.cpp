@@ -3,15 +3,57 @@
 using namespace std;
 using namespace cv;
 
-int main( int argc, char** argv )
-{
+#define SRC_IMAGE "C:/Users/koyajima/Pictures/whiteback.png"
+
+///////////////////   fullscreen.cpp   /////////////////////
+
+typedef struct {
+    int dispno;
+    int arraysz;
+    MONITORINFO *minfo;
+} MonList;
+
+bool CALLBACK
+monCallback(HMONITOR hMonitor, HDC hdc, LPRECT lprcMonitor, LPARAM dwData);
+
+MonList *
+createMonList(HDC hdc, LPCRECT lprcClip);
+
+int
+releaseMonList(MonList **ml);
+
+typedef struct {
+    int width;
+    int height;
+    int x0; // x position of top-left corner
+    int y0; // y position of top-left corner
+    int monitor_id;
+} ScreenInfo;
+
+
+int
+getScreenInfo(int monitor_id, ScreenInfo *si);
+
+int
+undecorateWindow(const char *win);
+
+int
+setWindowFullscreen(const char *win, ScreenInfo *si);
+
+int
+setWindowTranslucent(const char *win, unsigned char alpha);
+
+int
+setWindowChromaKeyed(const char *win, CvScalar color);
+
+int main(){
     //cv::Mat src;
 	vector< vector<cv::Point> > contours;
 	//vector<cv::vector<cv::Point>> squares;
 	//vector<cv::vector<cv::Point> > poly;
 	std::vector<cv::Vec4i> hierarchy;
 	std::vector<cv::Point> approx;
-	cv::Point2f scr_corner[4];
+	cv::Point2i scr_corner[4];
 	const int idx=-1;
 	const int thick=2;
 
@@ -19,10 +61,22 @@ int main( int argc, char** argv )
 	cv::VideoCapture cap(1);
     if(!cap.isOpened())
         return -1;
-    cv::namedWindow("contours",1);
 
 	while(1)
 	{
+
+		cv::Mat proj = cv::imread(SRC_IMAGE);
+		if(proj.empty()){
+			cout << "error:image not found" << endl;
+			return -1;
+		}
+		cv::namedWindow("projection");
+		undecorateWindow("projection"); 
+		ScreenInfo si;
+		getScreenInfo(1, &si);
+		setWindowFullscreen("projection", &si);
+		cv::resize(proj, proj, cv::Size(si.width, si.height),0, 0, cv::INTER_CUBIC);
+
 		Mat src, gray, bin;
 		cap >> src;
 
@@ -87,10 +141,22 @@ int main( int argc, char** argv )
 				}
 			}
 		}
+		//高さ、幅　出力
+		std::ostringstream os;
+		os << "width=" << std::abs(scr_corner[0].x - scr_corner[2].x);
+		std::string number = os.str();
+		cv::putText(proj, number , cv::Point(100,200), cv::FONT_HERSHEY_SIMPLEX,
+			3.2, cv::Scalar(255,0,255), 10, CV_AA);
+
+		std::ostringstream os2;
+		os2 << "height=" << std::abs(scr_corner[0].y - scr_corner[2].y);
+		std::string number2 = os2.str();
+		cv::putText(proj, number2 , cv::Point(100,400), cv::FONT_HERSHEY_SIMPLEX,
+			3.2, cv::Scalar(255,0,255), 10, CV_AA);
+
 		// 表示、キー入力で終了
+		imshow("projection", proj);
 		imshow("contours", src);
-		//imshow("gray", gray);
-		//imshow("bin", bin);
 		if (waitKey(2) > 0) 
 		{
             break;

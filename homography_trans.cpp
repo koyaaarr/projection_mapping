@@ -5,7 +5,7 @@ STimerList st;
 using namespace std;
 using namespace cv;
 
-#define SRC_IMAGE "C:/Users/koyajima/Pictures/Projection_Mapping/id0103.png"
+#define SRC_IMAGE "C:/Users/koyajima/Pictures/Projection_Mapping/id0102.png"
 
 #define P_WIDTH	1280
 #define P_HEIGHT 800
@@ -165,7 +165,7 @@ int main(int argc, char *argv[]){
 
 		if(src_pt[0].x != 0){
 			// homography çsóÒÇåvéZ
-			cv::Mat homography_matrix = cv::getPerspectiveTransform(src_pt,dst_pt);
+			cv::Mat homography_matrix = cv::getPerspectiveTransform(src_pt, dst_pt);
 
 			// ïœä∑
 			cv::warpPerspective( src, src, homography_matrix,src.size());

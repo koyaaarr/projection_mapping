@@ -7,7 +7,7 @@ int main( int argc, char** argv )
 {
     //cv::Mat src;
 
-	cv::VideoCapture cap(1);
+	cv::VideoCapture cap(0);
     if(!cap.isOpened())
         return -1;
     cv::namedWindow("window",1);

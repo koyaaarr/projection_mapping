@@ -114,6 +114,8 @@ int main(int argc, char *argv[]){
 	cv::Point2f corner[4];
 	int radius = 5; // キーポイントの半径
 
+	cv::Point2f scree[4];
+
 	while(1) {
 		st.laptime(0);
 
@@ -177,12 +179,32 @@ int main(int argc, char *argv[]){
 				corner[3].x = a.vertex[3][0];
 				corner[3].y = a.vertex[3][1];
 			}
+			if(a.id==2){
+				scree[0].x = a.vertex[0][0];
+				scree[0].y = a.vertex[0][1];
+			}
+			if(a.id==3){
+				scree[1].x = a.vertex[0][0];
+				scree[11].y = a.vertex[0][1];
+			}
+			if(a.id==4){
+				scree[2].x = a.vertex[0][0];
+				scree[2].y = a.vertex[0][1];
+			}
+			if(a.id==5){
+				scree[3].x = a.vertex[0][0];
+				scree[3].y = a.vertex[0][1];
+			}
 		}
 		///////4点を描く
 		if(corner[0].x != 0){
-			for(int l = 0; l < 4; l++)
-			{
+			for(int l = 0; l < 4; l++){
 				cv::circle(src, corner[l], radius,  CV_RGB(0,0,255), 5, 8, 0);
+			}
+		}
+		if(scree[0].x != 0){
+			for(int l = 0; l < 4; l++){
+				cv::circle(src, scree[l], radius,  CV_RGB(0,0,255), 5, 8, 0);
 			}
 		}
 		/*表示*/

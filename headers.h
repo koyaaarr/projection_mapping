@@ -39,3 +39,8 @@
 
 ////////  自前関数のインクルード
 #include "stattimer.hpp"
+
+
+///////// ESM
+#include "NewTrackerESM01.hpp"
+#pragma comment(lib,"user32.lib")
