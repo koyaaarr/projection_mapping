@@ -55,7 +55,7 @@ int main( int argc, char** argv )
 			//—ÖŠs‚ð‹ßŽ—‚·‚é
 			cv::approxPolyDP(contours[j], approx, cv::arcLength(contours[j], true)*0.02, true);
 			//’¸“_‚ª4‚Â‚Ìê‡
-			if (approx.size() == 4 && abs(approx[0].x - approx[2].x) > 100){
+			if (approx.size() == 4 && abs(approx[0].x - approx[2].x) > 70){
 				//4‚Â‚Ì’¸“_‚ð•`‚­
 				for (unsigned int k = 0; k < approx.size(); k++){
 					cv::circle(src, approx[k], 5,  CV_RGB(255,0,0), 2, 8, 0);
