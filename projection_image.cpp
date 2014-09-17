@@ -1,46 +1,27 @@
-#include <vector>
-#include <iostream>
-#define _WIN32_WINNT 0x0500 // must be before windows.h (only needed you use a transparent window)
-#include <windows.h> 
-#include "opencv2/opencv.hpp"
-#include <opencv2/core/core.hpp>
-#include <opencv2/imgproc/imgproc.hpp>
-#include <opencv2/highgui/highgui.hpp>
-#include <ARToolKitPlus/TrackerMultiMarkerImpl.h>
-#include "stattimer.hpp"
-STimerList st;
-#include "NewTrackerESM01.hpp"
-#pragma comment(lib,"user32.lib")
+#include "headers.h"
 
+STimerList st;
 
 using namespace std;
 using namespace cv;
 
 #define DEBUG
 
-//////////////////////  Mat type  ///////////////////////////
-string type2str(int type) {
-  string r;
+#define SRC_IMAGE "C:/Users/koyajima/Pictures/Projection_Mapping/id0103.png"
+#define ARMARKER "C:/Users/koyajima/Pictures/Projection_Mapping/id0102.png"
+#define TEMPLATE "C:/Users/koyajima/Pictures/Projection_Mapping/lenna.png"
 
-  uchar depth = type & CV_MAT_DEPTH_MASK;
-  uchar chans = 1 + (type >> CV_CN_SHIFT);
+#define UPDATE_FRAME
+#define A4_SCREEN
+#define PROJECTOR_SIZE_SCREEN
 
-  switch ( depth ) {
-    case CV_8U:  r = "8U"; break;
-    case CV_8S:  r = "8S"; break;
-    case CV_16U: r = "16U"; break;
-    case CV_16S: r = "16S"; break;
-    case CV_32S: r = "32S"; break;
-    case CV_32F: r = "32F"; break;
-    case CV_64F: r = "64F"; break;
-    default:     r = "User"; break;
-  }
+#define CLICK_PROCEED
+#define FRAME_PROCEED
 
-  r += "C";
-  r += (chans+'0');
+#define RECORDING
+#define RECORD_FRAME
 
-  return r;
-}
+
 //////////////////////////    ARtoolikitの設定    //////////////////////////////
 
 // tracker に渡す画像のサイズ
@@ -193,7 +174,7 @@ visualizeROI(const Mat& image, const Mat& target,
 }
 
 
-/////////////////////main///////////////////////////
+/////////////////////main////////////////////////////////////////////////////////////////////////////
 
 int main(int argc, char *argv[]){
 
@@ -203,8 +184,8 @@ int main(int argc, char *argv[]){
 	cap.set(CV_CAP_PROP_FRAME_HEIGHT, 480);
 	cv::Mat src;
 	//cv::namedWindow("Capture", CV_WINDOW_AUTOSIZE|CV_WINDOW_FREERATIO);
-	cv::Mat marker = cv::imread("C:/Users/koyajima/Pictures/Projection_Mapping/id0102.png");
-	cv::Mat lenna = cv::imread("C:/Users/koyajima/Pictures/Projection_Mapping/id0103.png");
+	cv::Mat marker = cv::imread(ARMARKER);
+	cv::Mat lenna = cv::imread(SRC_IMAGE);
 	cv::namedWindow("projection");
 	undecorateWindow("projection"); 
 	ScreenInfo si;
@@ -260,19 +241,8 @@ int main(int argc, char *argv[]){
 	Point2f ex_pt_pi[4];
 	Point2f ex2_pt_pi[4];
 	Point2f ex3_pt_pi[4];
-	Point2f ex4_pt_pi[4];
-	Point2f ex5_pt_pi[4];
-	Point2f ex6_pt_pi[4];
-	Point2f ex7_pt_pi[4];
-	Point2f ex8_pt_pi[4];
-	Point2f ex9_pt_pi[4];
 	Point2f pt_pi[4];
 	Point2f pt_po[4];
-	//DVI用
-	//pt_pi[0] = cv::Point2f(483.0f,184.0f);
-	//pt_pi[1] = cv::Point2f(483.0f,584.0f);
-	//pt_pi[2] = cv::Point2f(883.0f,584.0f);
-	//pt_pi[3] = cv::Point2f(883.0f,184.0f);
 	//HDMI用		
 	pt_pi[0] = cv::Point2f(327.0f,140.0f);
 	pt_pi[1] = cv::Point2f(327.0f,340.0f);
@@ -349,7 +319,7 @@ int main(int argc, char *argv[]){
 /////////////////////////     ESM     //////////////////////
 
 	//テンプレートの設定
-	cv::Mat tpl = cv::imread("C:/Users/koyajima/Pictures/Projection_Mapping/lenna.png");
+	cv::Mat tpl = cv::imread(TEMPLATE);
 	cvtColor(tpl, tpl, CV_RGB2GRAY);
 	cv::Rect tpl_rect;
 	tpl_rect.x = 0;
@@ -389,8 +359,11 @@ int main(int argc, char *argv[]){
 
 	while(1) {
 		
-				while(1){
+		while(1){
 			int key;
+			//if(key == 'a'){
+			//	goto RETURN_0;
+			//}
 			if ((key = cv::waitKey(10)) > 0) {
 				if (key == 'q' || key == 0x1b) {
 					break;
@@ -663,5 +636,6 @@ int main(int argc, char *argv[]){
 		//// and write
 		//writeTimedImages(writer, video, timestamp, nframe, fps, verbose);
 
+RETURN_0:
 		return 0;
 }
