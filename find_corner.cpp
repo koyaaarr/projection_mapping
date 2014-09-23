@@ -137,10 +137,17 @@ int main(int argc, char *argv[]){
 		//ó÷äsåüèo
 		cv::findContours (bin, contours, hierarchy, CV_RETR_CCOMP, CV_CHAIN_APPROX_SIMPLE);
 		//cv::drawContours (src, contours, -1, cv::Scalar(100), 2, 8);
+		cout << "loop" << endl;
 		//åüèoÇµÇΩó÷äsÇ≤Ç∆Ç…å©ÇƒâÒÇÈ
-		for (unsigned int j = 0; j < contours.size(); j++)
-		{
-			approx = contours[j];
+		for (unsigned int j = 0; j < contours.size(); j++){
+		approx = contours[j];
+		cout << "aprrox" << endl;
+		if(approx.size()==4){
+			cout << "size4" << endl;
+		}
+		if(hierarchy[j][2] != -1){
+			cout << "hie" << endl;
+		}
 			//ó÷äsÇãﬂéóÇ∑ÇÈ
 			cv::approxPolyDP(contours[j], approx, cv::arcLength(contours[j], true)*0.02, true);
 			//í∏ì_Ç™4Ç¬ÇÃèÍçá
