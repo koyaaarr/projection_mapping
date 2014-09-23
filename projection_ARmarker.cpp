@@ -73,7 +73,8 @@ int main(int argc, char *argv[]){
 	ScreenInfo si;
     getScreenInfo(1, &si);
 	setWindowFullscreen("projection", &si);
-    cv::resize(proj, proj, cv::Size(si.width, si.height),0, 0, cv::INTER_CUBIC);
+	Mat proj_fit;
+    cv::resize(proj, proj_fit, cv::Size(si.width, si.height),0, 0, cv::INTER_CUBIC);
 
 //       ó÷äsåüèoÇÃèâä˙ê›íË
 
@@ -136,16 +137,77 @@ int main(int argc, char *argv[]){
 	//pt_po[3] = cv::Point2f(1366,1);
 
 	//HDMIóp		
-	pt_pi[0] = cv::Point2f(327.0f,140.0f);
-	pt_pi[1] = cv::Point2f(327.0f,340.0f);
-	pt_pi[2] = cv::Point2f(527.0f,340.0f);
-	pt_pi[3] = cv::Point2f(527.0f,140.0f);
+
+	//pt_pi[0] = cv::Point2f(327.0f,140.0f);
+	//pt_pi[1] = cv::Point2f(327.0f,340.0f);
+	//pt_pi[2] = cv::Point2f(527.0f,340.0f);
+	//pt_pi[3] = cv::Point2f(527.0f,140.0f);
+
+	//pt_po[0] = cv::Point2f(1,1);
+	//pt_po[1] = cv::Point2f(1,480);
+	//pt_po[2] = cv::Point2f(854,480);
+	//pt_po[3] = cv::Point2f(854,1);
+
+
+	//pt_po[0] = cv::Point2f(1,1);
+	//pt_po[1] = cv::Point2f(1,480);
+	//pt_po[2] = cv::Point2f(854,480);
+	//pt_po[3] = cv::Point2f(854,1);
+	//pt_pi[0] = cv::Point2f(312.0f,184.0f);
+	//pt_pi[1] = cv::Point2f(312.0f,584.0f);
+	//pt_pi[2] = cv::Point2f(712.0f,584.0f);
+	//pt_pi[3] = cv::Point2f(712.0f,184.0f);
+
+	//pt_pi[0] = cv::Point2f(400.0f,200.0f);
+	//pt_pi[1] = cv::Point2f(400.0f,500.0f);
+	//pt_pi[2] = cv::Point2f(1200.0f,500.0f);
+	//pt_pi[3] = cv::Point2f(1200.0f,200.0f);
+
+	//pt_po[0] = cv::Point2f(1,1);
+	//pt_po[1] = cv::Point2f(1,1200);
+	//pt_po[2] = cv::Point2f(1600,1200);
+	//pt_po[3] = cv::Point2f(1600,1);
+
+	//pt_pi[0] = cv::Point2f(300.0f,200.0f);
+	//pt_pi[1] = cv::Point2f(300.0f,400.0f);
+	//pt_pi[2] = cv::Point2f(500.0f,400.0f);
+	//pt_pi[3] = cv::Point2f(500.0f,200.0f);
+
+	//pt_po[0] = cv::Point2f(1,1);
+	//pt_po[1] = cv::Point2f(1,600);
+	//pt_po[2] = cv::Point2f(800,600);
+	//pt_po[3] = cv::Point2f(800,1);
+
+	//pt_pi[0] = cv::Point2f(780.0f,300.0f);
+	//pt_pi[1] = cv::Point2f(780.0f,1300.0f);
+	//pt_pi[2] = cv::Point2f(1780.0f,1300.0f);
+	//pt_pi[3] = cv::Point2f(1780.0f,300.0f);
+
+	//pt_po[0] = cv::Point2f(1,1);
+	//pt_po[1] = cv::Point2f(1,1600);
+	//pt_po[2] = cv::Point2f(2560,1600);
+	//pt_po[3] = cv::Point2f(2560,1);
+
+
+	//pt_po[0] = cv::Point2f(1,1);
+	//pt_po[1] = cv::Point2f(1,512);
+	//pt_po[2] = cv::Point2f(682,512);
+	//pt_po[3] = cv::Point2f(682,1);
+
+	//pt_pi[0] = cv::Point2f(241.0f,156.0f);
+	//pt_pi[1] = cv::Point2f(241.0f,356.0f);
+	//pt_pi[2] = cv::Point2f(441.0f,356.0f);
+	//pt_pi[3] = cv::Point2f(441.0f,156.0f);
 
 	pt_po[0] = cv::Point2f(1,1);
-	pt_po[1] = cv::Point2f(1,480);
-	pt_po[2] = cv::Point2f(854,480);
-	pt_po[3] = cv::Point2f(854,1);
+	pt_po[1] = cv::Point2f(1,720);
+	pt_po[2] = cv::Point2f(1280,720);
+	pt_po[3] = cv::Point2f(1280,1);
 
+	pt_pi[0] = cv::Point2f(565.0f,285.0f);
+	pt_pi[1] = cv::Point2f(565.0f,435.0f);
+	pt_pi[2] = cv::Point2f(715.0f,435.0f);
+	pt_pi[3] = cv::Point2f(715.0f,285.0f);
 	//Iç¿ïWê›íË
 	//ì‡òg
 	const cv::Point2f pt_ii[] = {cv::Point2f(406,206),cv::Point2f(406,306),cv::Point2f(506,306),
@@ -153,6 +215,26 @@ int main(int argc, char *argv[]){
 	//äOòg	
 	const cv::Point2f pt_io[] = {cv::Point2f(1,1),cv::Point2f(1,912),cv::Point2f(513,912),
 		cv::Point2f(513,1)};
+	//pt_io[0] = cv::Point2f(1,1);
+	//pt_io[1] = cv::Point2f(1,512);
+	//pt_io[2] = cv::Point2f(682,512);
+	//pt_io[3] = cv::Point2f(682,1);
+
+	//pt_ii[0] = cv::Point2f(241.0f,156.0f);
+	//pt_ii[1] = cv::Point2f(241.0f,356.0f);
+	//pt_ii[2] = cv::Point2f(441.0f,356.0f);
+	//pt_ii[3] = cv::Point2f(441.0f,156.0f);
+
+	//pt_io[0] = cv::Point2f(1,1);
+	//pt_io[1] = cv::Point2f(1,768);
+	//pt_io[2] = cv::Point2f(1024,768);
+	//pt_io[3] = cv::Point2f(1024,1);
+
+	//pt_ii[0] = cv::Point2f(312.0f,184.0f);
+	//pt_ii[1] = cv::Point2f(312.0f,384.0f);
+	//pt_ii[2] = cv::Point2f(512.0f,384.0f);
+	//pt_ii[3] = cv::Point2f(512.0f,184.0f);
+
 	//Sç¿ïWê›íË
 	//const cv::Point2f pt_si[] = {cv::Point2f(20,40),cv::Point2f(20,70),cv::Point2f(50,70),
 	//							cv::Point2f(50,40)};
@@ -161,15 +243,40 @@ int main(int argc, char *argv[]){
 	cv::Point2f pt_si[4];
 	cv::Point2f pt_so[4];
 	//îwåiÇ…é Ç∑óp
-	pt_si[0] = cv::Point2f(327.0f,140.0f);
-	pt_si[1] = cv::Point2f(327.0f,340.0f);
-	pt_si[2] = cv::Point2f(527.0f,340.0f);
-	pt_si[3] = cv::Point2f(527.0f,140.0f);
+	//pt_si[0] = cv::Point2f(400.0f,200.0f);
+	//pt_si[1] = cv::Point2f(400.0f,1000.0f);
+	//pt_si[2] = cv::Point2f(1200.0f,1000.0f);
+	//pt_si[3] = cv::Point2f(1200.0f,200.0f);
+
+	//pt_so[0] = cv::Point2f(1,1);
+	//pt_so[1] = cv::Point2f(1,1200);
+	//pt_so[2] = cv::Point2f(1600,1200);
+	//pt_so[3] = cv::Point2f(1600,1);
+
+	//pt_si[0] = cv::Point2f(300.0f,200.0f);
+	//pt_si[1] = cv::Point2f(300.0f,400.0f);
+	//pt_si[2] = cv::Point2f(500.0f,400.0f);
+	//pt_si[3] = cv::Point2f(500.0f,200.0f);
+
+	//pt_so[0] = cv::Point2f(1,1);
+	//pt_so[1] = cv::Point2f(1,600);
+	//pt_so[2] = cv::Point2f(800,600);
+	//pt_so[3] = cv::Point2f(800,1);
+
+	//pt_si[0] = cv::Point2f(780.0f,300.0f);
+	//pt_si[1] = cv::Point2f(780.0f,1300.0f);
+	//pt_si[2] = cv::Point2f(1780.0f,1300.0f);
+	//pt_si[3] = cv::Point2f(1780.0f,300.0f);
 
 	pt_so[0] = cv::Point2f(1,1);
-	pt_so[1] = cv::Point2f(1,480);
-	pt_so[2] = cv::Point2f(854,480);
-	pt_so[3] = cv::Point2f(854,1);
+	pt_so[1] = cv::Point2f(1,720);
+	pt_so[2] = cv::Point2f(1280,720);
+	pt_so[3] = cv::Point2f(1280,1);
+
+	pt_si[0] = cv::Point2f(390.0f,110.0f);
+	pt_si[1] = cv::Point2f(390.0f,610.0f);
+	pt_si[2] = cv::Point2f(890.0f,610.0f);
+	pt_si[3] = cv::Point2f(890.0f,110.0f);
 
 	//A4Ç…é Ç∑óp
 	//pt_si[0] = cv::Point2f(112,72);
@@ -217,6 +324,7 @@ int main(int argc, char *argv[]){
 		//åüèoÇµÇΩó÷äsÇ≤Ç∆Ç…å©ÇƒâÒÇÈ
 		for (unsigned int j = 0; j < contours.size(); j++){
 		approx = contours[j];
+
 		//ó÷äsÇãﬂéóÇ∑ÇÈ
 		cv::approxPolyDP(contours[j], approx, cv::arcLength(contours[j], true)*0.02, true);
 			//í∏ì_Ç™4Ç¬ÇÃèÍçá
@@ -336,13 +444,13 @@ int main(int argc, char *argv[]){
 
 		if(frame<21){
 		iHp_origin = cv::getPerspectiveTransform( pt_ii, pt_pi);
-		cv::warpPerspective( proj, warp, iHp_origin, proj.size());
+		cv::warpPerspective( proj, warp, iHp_origin, proj_fit.size());
 		}
 
 		//frame>10Ç©ÇÁÉgÉâÉbÉLÉìÉO
 		if(frame>20)
 		{
-			cv::warpPerspective( proj, warp, iHp, proj.size());
+			cv::warpPerspective( proj, warp, iHp, proj_fit.size());
 			p_corner[0] = pt_ii[0];
 			p_corner[1] = pt_ii[1];
 			p_corner[2] = pt_ii[2];
