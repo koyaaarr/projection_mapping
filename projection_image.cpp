@@ -11,28 +11,7 @@ using namespace cv;
 #define ARMARKER "C:/Users/koyajima/Pictures/Projection_Mapping/id0102.png"
 #define TEMPLATE "C:/Users/koyajima/Pictures/Projection_Mapping/lenna.png"
 
-#define UPDATE_FRAME
-#define A4_SCREEN
-#define PROJECTOR_SIZE_SCREEN
-
-#define CLICK_PROCEED
-#define FRAME_PROCEED
-
-#define RECORDING
-#define RECORD_FRAME
-
-
-//////////////////////////    ARtoolikitの設定    //////////////////////////////
-
-// tracker に渡す画像のサイズ
-#define WIDTH	640
-#define HEIGHT	480
-
-// 近遠クリッピングの距離（通常このままでよい）
-#define NEAR_LEN	1.0
-#define FAR_LEN		10000.0
-
-///////////////////////////    Fullscreenの設定    /////////////////////////////
+///////////////////   fullscreen.cpp   /////////////////////
 
 typedef struct {
     int dispno;
@@ -73,39 +52,6 @@ setWindowTranslucent(const char *win, unsigned char alpha);
 int
 setWindowChromaKeyed(const char *win, CvScalar color);
 
-//////////////////////      cv::VideoWriter        /////////////////////////
- 
-void
-verbose_printf(int verbose, const char *fmt, int arg = 0)
-{
-    if (verbose) {
-        printf(fmt, arg);
-        fflush(stdout);
-    }
-}
-
-void
-writeTimedImages(cv::VideoWriter& writer, cv::Mat *video, double *timestamp,
-                 int nframe, double fps, int verbose = 0)
-{
-    double timebase = timestamp[0];
-    verbose_printf(verbose, "written frames (out of %d):   0", nframe);
-
-    for (int i = 0; ; ) {
-        writer << video[i];
-        verbose_printf(verbose, "\b\b\b%3d", i + 1);
-        if (i >= nframe - 1) {
-            break;
-        }
-
-        timebase += (1000.0 / fps);
-        while (i < nframe - 1 && timebase > timestamp[i + 1]) {
-            i++;
-        }
-    }
-
-    verbose_printf(verbose, "\ndone\n");
-}
 
 //////////////////////   ESM   ///////////////////////////
 
@@ -174,29 +120,42 @@ visualizeROI(const Mat& image, const Mat& target,
 }
 
 
-/////////////////////main////////////////////////////////////////////////////////////////////////////
+
+////////////  main  /////////////
 
 int main(int argc, char *argv[]){
 
 //      Fullscreenの初期設定
+//      Fullscreenの初期設定
 	cv::VideoCapture cap(1);
+	if(!cap.isOpened()){
+		cout << "error:camera not found" << endl;
+		return -1;
+	}
 	cap.set(CV_CAP_PROP_FRAME_WIDTH, 640);
 	cap.set(CV_CAP_PROP_FRAME_HEIGHT, 480);
-	cv::Mat src;
 	//cv::namedWindow("Capture", CV_WINDOW_AUTOSIZE|CV_WINDOW_FREERATIO);
-	cv::Mat marker = cv::imread(ARMARKER);
-	cv::Mat lenna = cv::imread(SRC_IMAGE);
+	cv::Mat proj = cv::imread(ARMARKER);
+	if(proj.empty()){
+		cout << "error:image not found" << endl;
+		return -1;
+	}
+	cv::Mat cont = cv::imread(SRC_IMAGE);
+	if(cont.empty()){
+		cout << "error:image not found" << endl;
+		return -1;
+	}
 	cv::namedWindow("projection");
 	undecorateWindow("projection"); 
 	ScreenInfo si;
     getScreenInfo(1, &si);
 	setWindowFullscreen("projection", &si);
-	cv::Mat window_fit;
-    cv::resize(lenna, window_fit, cv::Size(si.width, si.height),0, 0, cv::INTER_CUBIC);
+	Mat proj_fit;
+    cv::resize(proj, proj_fit, cv::Size(si.width, si.height),0, 0, cv::INTER_CUBIC);
 
 //       輪郭検出の初期設定
 
-	Mat bin;
+	Mat src, gray, bin;
 	vector< vector<cv::Point> > contours;
 	cv::vector<cv::vector<cv::Point>> squares;
 	cv::vector<cv::vector<cv::Point> > poly;
@@ -243,17 +202,16 @@ int main(int argc, char *argv[]){
 	Point2f ex3_pt_pi[4];
 	Point2f pt_pi[4];
 	Point2f pt_po[4];
-	//HDMI用		
-	pt_pi[0] = cv::Point2f(327.0f,140.0f);
-	pt_pi[1] = cv::Point2f(327.0f,340.0f);
-	pt_pi[2] = cv::Point2f(527.0f,340.0f);
-	pt_pi[3] = cv::Point2f(527.0f,140.0f);
 
 	pt_po[0] = cv::Point2f(1,1);
-	pt_po[1] = cv::Point2f(1,480);
-	pt_po[2] = cv::Point2f(854,480);
-	pt_po[3] = cv::Point2f(854,1);
+	pt_po[1] = cv::Point2f(1,720);
+	pt_po[2] = cv::Point2f(1280,720);
+	pt_po[3] = cv::Point2f(1280,1);
 
+	pt_pi[0] = cv::Point2f(565.0f,285.0f);
+	pt_pi[1] = cv::Point2f(565.0f,435.0f);
+	pt_pi[2] = cv::Point2f(715.0f,435.0f);
+	pt_pi[3] = cv::Point2f(715.0f,285.0f);
 	//I座標設定
 	//内枠
 	const cv::Point2f pt_ii[] = {cv::Point2f(406,206),cv::Point2f(406,306),cv::Point2f(506,306),
@@ -261,34 +219,31 @@ int main(int argc, char *argv[]){
 	//外枠	
 	const cv::Point2f pt_io[] = {cv::Point2f(1,1),cv::Point2f(1,912),cv::Point2f(513,912),
 		cv::Point2f(513,1)};
+
 	//S座標設定
-	//const cv::Point2f pt_si[] = {cv::Point2f(20,40),cv::Point2f(20,70),cv::Point2f(50,70),
-	//							cv::Point2f(50,40)};
-	//const cv::Point2f pt_so[] = {cv::Point2f(0,0),cv::Point2f(0,100),cv::Point2f(100,100),
-	//							cv::Point2f(100,0)};
 	cv::Point2f pt_si[4];
 	cv::Point2f pt_so[4];
-	//背景に写す用
-	//pt_si[0] = cv::Point2f(327.0f,140.0f);
-	//pt_si[1] = cv::Point2f(327.0f,340.0f);
-	//pt_si[2] = cv::Point2f(527.0f,340.0f);
-	//pt_si[3] = cv::Point2f(527.0f,140.0f);
 
-	//pt_so[0] = cv::Point2f(1,1);
-	//pt_so[1] = cv::Point2f(1,480);
-	//pt_so[2] = cv::Point2f(854,480);
-	//pt_so[3] = cv::Point2f(854,1);
+	pt_so[0] = cv::Point2f(1,1);
+	pt_so[1] = cv::Point2f(1,720);
+	pt_so[2] = cv::Point2f(1280,720);
+	pt_so[3] = cv::Point2f(1280,1);
+
+	pt_si[0] = cv::Point2f(390.0f,110.0f);
+	pt_si[1] = cv::Point2f(390.0f,610.0f);
+	pt_si[2] = cv::Point2f(890.0f,610.0f);
+	pt_si[3] = cv::Point2f(890.0f,110.0f);
 
 	//A4に写す用
-	pt_si[0] = cv::Point2f(112,72);
-	pt_si[1] = cv::Point2f(112,147);
-	pt_si[2] = cv::Point2f(187,147);
-	pt_si[3] = cv::Point2f(187,72);
+	//pt_si[0] = cv::Point2f(112,72);
+	//pt_si[1] = cv::Point2f(112,147);
+	//pt_si[2] = cv::Point2f(187,147);
+	//pt_si[3] = cv::Point2f(187,72);
 
-	pt_so[0] = cv::Point2f(0,0);
-	pt_so[1] = cv::Point2f(0,210);
-	pt_so[2] = cv::Point2f(297,210);
-	pt_so[3] = cv::Point2f(297,0);
+	//pt_so[0] = cv::Point2f(0,0);
+	//pt_so[1] = cv::Point2f(0,210);
+	//pt_so[2] = cv::Point2f(297,210);
+	//pt_so[3] = cv::Point2f(297,0);
 
 	//テンプレートT座標設定
 	const Point2f pt_t[] = {cv::Point2f(0,0),cv::Point2f(0,47),cv::Point2f(47,47),
@@ -306,7 +261,7 @@ int main(int argc, char *argv[]){
 
 	int temp=0;
 	int frame=0;
-	const int check=10;
+	const int check=6;
 	int flag;
 	Mat warp;
 	vector<Point2f> p_corner(4);
@@ -346,48 +301,18 @@ int main(int argc, char *argv[]){
     esm_tracker.setIter(10);
     Mat G = cv::Mat(3,3,CV_32F);
 
-/////////////////    VideoWriterの設定   //////////////////
-
-    // prepare variables
-    double fps = 29.97;       // 動画フレームレート (frames/s)
-    const int nframe = 500;   // 撮影画像枚数
-    int verbose = 1;          // コンソールに進捗状況を出力するかどうか
-    cv::Mat video[nframe];    // 画像の配列
-    double timestamp[nframe]; // 各画像のタイムスタンプ (単位; ミリ秒)
-    double freq = (double)cv::getTickFrequency();
-	int i=0;
-
 	while(1) {
-		
-		while(1){
-			int key;
-			//if(key == 'a'){
-			//	goto RETURN_0;
-			//}
-			if ((key = cv::waitKey(10)) > 0) {
-				if (key == 'q' || key == 0x1b) {
-					break;
-				}
-			}
-		}
 
-
-		st.laptime(0);
-		st.start(1);
 		cap >> src;  // キャプチャ
-		st.stop(1);
 
-		st.start(2);
 		src.copyTo(disp);
 		//グレースケール変換
 		cv::cvtColor(disp, image, CV_BGR2GRAY);
 
-
 ////////////////////////////////////   輪郭検出   //////////////////////////////// 
 
-
 		//2値化
-		cv::threshold(image, bin, 200, 255, cv::THRESH_BINARY|cv::THRESH_OTSU); 
+		cv::threshold(image, bin, 100, 255, cv::THRESH_BINARY|cv::THRESH_OTSU); 
 
 		//収縮・膨張
 		cv::erode(bin, bin, cv::Mat(), cv::Point(-1,-1), 3); 
@@ -397,17 +322,17 @@ int main(int argc, char *argv[]){
 
 		//輪郭検出
 		cv::findContours (bin, contours, hierarchy, CV_RETR_CCOMP, CV_CHAIN_APPROX_SIMPLE);
-
+		//cv::drawContours (src, contours, -1, cv::Scalar(100), 2, 8);
 		//検出した輪郭ごとに見て回る
 		for (unsigned int j = 0; j < contours.size(); j++){
-
+		approx = contours[j];
 		//輪郭を近似する
 		cv::approxPolyDP(contours[j], approx, cv::arcLength(contours[j], true)*0.02, true);
 			//頂点が4つの場合
 			if (approx.size() == 4 && hierarchy[j][2] != -1){
 				//4つの頂点を描く
 				for (unsigned int k = 0; k < approx.size(); k++){
-					cv::circle(src, approx[k], 5,  CV_RGB(255,0,0), 2, 8, 0);
+					cv::circle(src, approx[k], 5*k,  CV_RGB(255,0,0), 2, 8, 0);
 				}
 			//外枠取得用
 				if(approx[0].x > approx[2].x && approx[0].y > approx[2].y){
@@ -434,15 +359,11 @@ int main(int argc, char *argv[]){
 					pt_cs[2] = cv::Point2f(approx[3].x,approx[3].y);
 					pt_cs[3] = cv::Point2f(approx[0].x,approx[0].y);
 				}
-			}
 		}
-		st.stop(2);
-
+		}
 		
 /////////////////////////   ARtoolkit     ///////////////////////////
 
-		if(frame<20){
-		st.start(3);
 		// 画像中からマーカを検出
 		tracker->calc((unsigned char *)(src.data));
 		
@@ -468,11 +389,8 @@ int main(int argc, char *argv[]){
 			}
 		}
 		//4点を描く
-		if(frame<20){
 		for(int l = 0; l < 4; l++){
-			cv::circle(src, corner[l], radius,  CV_RGB(0,0,255), 5, 8, 0);
-			cv::circle(disp, corner[l], radius,  CV_RGB(0,0,255), 5, 8, 0);
-		}
+			cv::circle(src, corner[l], radius*l,  CV_RGB(0,0,255), 5, 8, 0);
 		}
 		//内枠取得用
 		if(corner[0].x > corner[2].x && corner[0].y > corner[2].y){
@@ -499,17 +417,16 @@ int main(int argc, char *argv[]){
 		pt_cp[2] = cv::Point2f(corner[1].x,corner[1].y);
 		pt_cp[3] = cv::Point2f(corner[0].x,corner[0].y);
 		}
-		st.stop(3);
-		}
+
+
 
 //////////////////////////    ESM    /////////////////////////////
 
-		st.start(4);
         if (!esm_tracker.empty()) {
             G = esm_tracker.track(image, G);
         }
 
-        if (frame>25) {
+        if (frame>45) {
             vector<Point> corner_warped_int(4);
             transformCorners(target.size(), G, corner_warped_int);
             polylines(src, corner_warped_int, 1, CV_RGB(255, 0, 0), 3);
@@ -522,11 +439,9 @@ int main(int argc, char *argv[]){
 		//std::cout << "G = " << G << "\n" << std::endl;
 		//std::cout << "iHp_old = " << iHp_old << "\n" << std::endl;
 
-		st.stop(4);
 //////////////////////////ホモグラフィ変換//////////////////////
 
-		st.start(5);
-		////3フレーム前のpt_piを使う
+		//3フレーム前のpt_piを使う
 		for(int n = 0; n < 4; n++){
 		ex3_pt_pi[n] = ex2_pt_pi[n];
 		}
@@ -546,68 +461,61 @@ int main(int argc, char *argv[]){
 
 		//フレーム
 		frame++;
-		//std::cout << "frame=" << frame << std::endl;
+		/*std::cout << "frame=" << frame << std::endl;*/
 		flag = frame%check;
 
 		//IからPへ透視変換
-		if(frame>50&&flag==0){
+		if(frame>20&&frame<40){
+		iHp = cpHp * soHcs * iHsi;
+		iHp.copyTo(iHp_old);
+		}
+
+		if(frame>=50&&flag==0){
 		iHp = iHp_old * tHi * G.inv() * soHcs * iHsi;
 		iHp.copyTo(iHp_old);
 		}
 
-		if(frame<11){
-		cv::warpPerspective( marker, warp, iHp_origin, window_fit.size());
+		if(frame<21){
+		iHp_origin = cv::getPerspectiveTransform( pt_ii, pt_pi);
+		cv::warpPerspective( proj, warp, iHp_origin, proj_fit.size());
 		}
-		if(frame>10&&frame<60){//
-		cv::warpPerspective( lenna, warp, iHp_origin, window_fit.size());
+
+		//frame>10からトラッキング
+		if(frame>20&&frame<40)
+		{
+			cv::warpPerspective( proj, warp, iHp, proj_fit.size());
+			p_corner[0] = pt_ii[0];
+			p_corner[1] = pt_ii[1];
+			p_corner[2] = pt_ii[2];
+			p_corner[3] = pt_ii[3];
+			perspectiveTransform(p_corner, p_corner, iHp);
+			pt_pi[0] = p_corner[0];
+			pt_pi[1] = p_corner[1];
+			pt_pi[2] = p_corner[2];
+			pt_pi[3] = p_corner[3];
 		}
 		//frame>10からトラッキング
-		if(frame>59){
-		cv::warpPerspective( lenna, warp, iHp, window_fit.size());
-		p_corner[0] = pt_ii[0];
-		p_corner[1] = pt_ii[1];
-		p_corner[2] = pt_ii[2];
-		p_corner[3] = pt_ii[3];
-		perspectiveTransform(p_corner, p_corner, iHp);
-		pt_pi[0] = p_corner[0];
-		pt_pi[1] = p_corner[1];
-		pt_pi[2] = p_corner[2];
-		pt_pi[3] = p_corner[3];
+		if(frame>=40&&frame<50)
+		{
+			cv::warpPerspective( cont, warp, iHp, proj_fit.size());
+			/*cout << iHp << endl;*/
 		}
-		st.stop(5);
+		//frame>10からトラッキング
+		if(frame>=50)
+		{
+			cv::warpPerspective( cont, warp, iHp, proj_fit.size());
+			p_corner[0] = pt_ii[0];
+			p_corner[1] = pt_ii[1];
+			p_corner[2] = pt_ii[2];
+			p_corner[3] = pt_ii[3];
+			perspectiveTransform(p_corner, p_corner, iHp);
+			pt_pi[0] = p_corner[0];
+			pt_pi[1] = p_corner[1];
+			pt_pi[2] = p_corner[2];
+			pt_pi[3] = p_corner[3];
+		}
 
-		st.start(6);
-
-		//今のフレームを表示する
-		//std::ostringstream os;
-		//os << frame;
-		//std::string number = os.str();
-		//cv::putText(warp, number , cv::Point(50,50), cv::FONT_HERSHEY_SIMPLEX,
-		//			1.2, cv::Scalar(255,0,255), 2, CV_AA);
-
-		//表示
-		cv::imshow("projection", warp);
-
-		cv::imshow("Capture", src);
-		//cv::imshow("bin", bin);
-		//imshow("disp", disp);
-
-		////videowriter
-		//disp.copyTo(video[i]);
-  //      timestamp[i] = 1000.0 * (double)cv::getTickCount() / freq;
-		//i++;
-
-        //if (!target.empty()) {
-        //    visualizeROI(image, target, G, roi_disp);
-        //    imshow("roi", roi_disp);
-        //}
-
-		if (waitKey(2) > 0) {
-            break;
-        }
-
-
-        if (frame==20) {
+        if (frame==45) {
 		srh.x = pt_cp[0].x;
 		srh.y = pt_cp[0].y;
 		srh.width = pt_cp[3].x - pt_cp[0].x;
@@ -616,26 +524,24 @@ int main(int argc, char *argv[]){
             esm_tracker.copyTargetTo(target);
             mparam.init_requested = false;
         }
+		//表示
+		cv::imshow("projection", warp);
+		cv::imshow("Capture", src);
+		//cv::imshow("bin", bin);
+
+		if (waitKey(2) > 0) {
+            break;
+        }
+
 		//debug用
 		temp++;
  		//std::cout << temp << std::endl;
-		//if(temp==500){
-		//break;
-		//}
+		if(temp==1000){
+		break;
+		}
 
-		st.stop(6);
+
 		}//ループ終わり
-		
-		//// prepare VideoWriter
-		//cv::VideoWriter writer("video.avi", CV_FOURCC_PROMPT,
-		//	fps, video[0].size());
-		//if (!writer.isOpened()) {
-		//	fprintf(stderr, "cannot create writer\n");
-		//	exit(1);
-		//}
-		//// and write
-		//writeTimedImages(writer, video, timestamp, nframe, fps, verbose);
 
-RETURN_0:
 		return 0;
 }
